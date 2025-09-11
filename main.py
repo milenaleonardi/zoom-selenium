@@ -36,8 +36,9 @@ def scrape_pages(driver, pages=2):
         for produto in produtos:
             try:
                 titulo = produto.find_element(By.CSS_SELECTOR, '[data-testid="product-card::name"]').text
+                preco = produto.find_element(By.CSS_SELECTOR, '[data-testid="product-card::price"]').text
                 link = produto.find_element(By.CSS_SELECTOR, 'a').get_attribute('href')
-                items.append({'titulo': titulo, 'link': link})
+                items.append({'titulo': titulo, 'preco': preco, 'link': link})
             except:
                 pass
 
@@ -83,7 +84,7 @@ result_price = scrape_pages(driver, 2)
 
 # --- Ranking ---
 df = pd.DataFrame(result_default + result_best + result_price)
-ranking = df.groupby(["titulo","link"]).size().reset_index(name="aparicoes")
+ranking = df.groupby(["titulo","preco","link"]).size().reset_index(name="aparicoes")
 ranking = ranking.sort_values("aparicoes", ascending=False)
 print(ranking.head(10))
 
@@ -94,6 +95,7 @@ all_specs = []
 for _, row in top5.iterrows():
     specs = extract_specs(driver, row["link"])
     specs["titulo"] = row["titulo"]
+    specs["preco"] = row["preco"]
     specs["link"] = row["link"]
     specs["aparicoes"] = row["aparicoes"]
     all_specs.append(specs)
